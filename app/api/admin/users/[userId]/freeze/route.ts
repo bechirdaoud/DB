@@ -9,11 +9,10 @@ const bodySchema = z.object({
   status: z.enum(["ACTIVE", "FROZEN"]).optional(),
 });
 
-type Params = {
-  params: { userId: string };
-};
-
-export async function POST(request: Request, { params }: Params) {
+export async function POST(
+  request: Request,
+  ctx: RouteContext<"/api/admin/users/[userId]/freeze">,
+) {
   const result = await requireApiAdmin();
   if ("error" in result) {
     return result.error;
@@ -24,7 +23,7 @@ export async function POST(request: Request, { params }: Params) {
     return frozenResponse;
   }
 
-  const { userId } = params;
+  const { userId } = await ctx.params;
 
   const body = await request.json().catch(() => ({}));
   const parsed = bodySchema.safeParse(body);

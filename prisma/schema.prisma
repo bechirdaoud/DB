@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum EventType {
+  USER_CREATED
+  ACCOUNT_STATUS_CHANGED
+  PREFERENCES_UPDATED
+  AUDIT_ACTION
+}
+
+model User {
+  id              String      @id @default(cuid())
+  email           String      @unique
+  role            Role        @default(USER)
+  account         Account?
+  preferences     Preferences?
+  events          Event[]
+  actorAuditLogs  AuditLog[]  @relation("ActorAuditLogs")
+  targetAuditLogs AuditLog[]  @relation("TargetAuditLogs")
+}
+
+model Account {
+  id     String        @id @default(cuid())
+  userId String        @unique
+  status AccountStatus @default(ACTIVE)
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Preferences {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  riskLevel   RiskLevel @default(MEDIUM)
+  strategyId  String
+  constraints Json
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id        String    @id @default(cuid())
+  userId    String
+  type      EventType
+  payload   Json
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorUserId  String
+  targetUserId String?
+  action       String
+  metadata     Json
+  createdAt    DateTime @default(now())
+
+  actorUser  User  @relation("ActorAuditLogs", fields: [actorUserId], references: [id], onDelete: Cascade)
+  targetUser User? @relation("TargetAuditLogs", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+}

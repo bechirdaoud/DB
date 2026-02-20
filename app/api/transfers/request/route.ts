@@ -1,4 +1,4 @@
-import { EventType } from "@prisma/client";
+import { EventType, Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -34,15 +34,17 @@ export async function POST(request: Request) {
   }
 
   const createdEvent = await prisma.$transaction(async (tx) => {
+    const transferPayload: Prisma.InputJsonObject = {
+      amount: parsed.data.amount,
+      currency: parsed.data.currency,
+      reference: parsed.data.reference ?? null,
+    };
+
     const event = await tx.event.create({
       data: {
         userId: result.user.id,
         type: EventType[parsed.data.type],
-        payload: {
-          amount: parsed.data.amount,
-          currency: parsed.data.currency,
-          reference: parsed.data.reference ?? null,
-        },
+        payload: transferPayload,
       },
     });
 
@@ -51,7 +53,7 @@ export async function POST(request: Request) {
         actorUserId: result.user.id,
         targetUserId: result.user.id,
         action: parsed.data.type,
-        metadata: event.payload,
+        metadata: transferPayload,
       },
     });
 

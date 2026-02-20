@@ -1,4 +1,4 @@
-import { EventType, RiskLevel } from "@prisma/client";
+import { EventType, Prisma, RiskLevel } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -33,12 +33,18 @@ export async function POST(request: Request) {
   }
 
   const updated = await prisma.$transaction(async (tx) => {
+    const preferenceUpdateData = {
+      riskLevel: parsed.data.riskLevel,
+      strategyId: parsed.data.strategyId,
+      constraints: parsed.data.constraints as Prisma.InputJsonValue,
+    };
+
     const preferences = await tx.preferences.upsert({
       where: { userId: result.user.id },
-      update: parsed.data,
+      update: preferenceUpdateData,
       create: {
         userId: result.user.id,
-        ...parsed.data,
+        ...preferenceUpdateData,
       },
     });
 

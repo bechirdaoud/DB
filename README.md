@@ -2,10 +2,27 @@
 
 This project is configured to use **Clerk** authentication.
 
-## Environment
+## How to run locally
 
-Set these variables:
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Copy environment template and fill values:
+   ```bash
+   cp .env.example .env.local
+   ```
+3. Add Clerk keys in `.env.local`.
+4. Run Prisma migrations (or push schema) and seed if needed.
+5. Start the app:
+   ```bash
+   npm run dev
+   ```
 
+## Required environment variables
+
+- `DATABASE_URL` (PostgreSQL connection string)
+- `ADMIN_EMAIL` (seed/admin bootstrap value)
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
 

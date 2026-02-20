@@ -11,7 +11,7 @@ const bodySchema = z.object({
 
 export async function POST(
   request: Request,
-  ctx: RouteContext<"/api/admin/users/[userId]/freeze">,
+  { params }: { params: Promise<{ userId: string }> },
 ) {
   const result = await requireApiAdmin();
   if ("error" in result) {
@@ -23,7 +23,7 @@ export async function POST(
     return frozenResponse;
   }
 
-  const { userId } = await ctx.params;
+  const { userId } = await params;
 
   const body = await request.json().catch(() => ({}));
   const parsed = bodySchema.safeParse(body);

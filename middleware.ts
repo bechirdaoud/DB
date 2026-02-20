@@ -3,9 +3,22 @@ import { NextResponse } from "next/server";
 
 import { hasAdminRole, hasSecondFactor } from "./lib/auth-claims";
 
+const isClerkConfigured =
+  Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) &&
+  Boolean(process.env.CLERK_SECRET_KEY);
+
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionClaims, redirectToSignIn } = await auth();
   const pathname = req.nextUrl.pathname;
+
+  if (!isClerkConfigured) {
+    if (pathname.startsWith("/admin") || pathname.startsWith("/app")) {
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    }
+
+    return NextResponse.next();
+  }
+
+  const { userId, sessionClaims, redirectToSignIn } = await auth();
 
   if (pathname.startsWith("/admin")) {
     if (!userId) {

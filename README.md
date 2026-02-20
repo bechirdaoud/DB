@@ -26,6 +26,11 @@ This project is configured to use **Clerk** authentication.
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
 
+## Vercel deployment check
+
+If Vercel shows `MIDDLEWARE_INVOCATION_FAILED`, make sure both Clerk keys are set in the Vercel project environment variables for the target environment (Preview/Production), then redeploy.
+
+
 ## Roles
 
 Set `publicMetadata.role` (or `metadata.role`) to `ADMIN` for admin users.
